@@ -1,27 +1,16 @@
-FROM rustlang/rust:nightly as builder
+FROM rust:1.81-slim AS builder
 
-ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /app
+COPY . .
 
-RUN apt update && apt install -y git bash make gcc linux-libc-dev patch musl musl-tools musl-dev
+# Compila o binário em release
+RUN cargo build --release
 
-RUN rustup target add x86_64-unknown-linux-musl
+# --- runtime ---
+FROM debian:bookworm-slim
 
-COPY . /rumble-build
+WORKDIR /app
+COPY --from=builder /app/target/release/rust-mumble /app/target/release/
 
-WORKDIR /rumble-build
-
-RUN --mount=type=cache,target=/usr/local/cargo,from=rust,source=/usr/local/cargo \
-    --mount=type=cache,target=target \
-    cargo build --release --target x86_64-unknown-linux-musl && cp target/x86_64-unknown-linux-musl/release/rust-mumble /rust-mumble
-
-FROM scratch
-
-COPY --from=builder /rust-mumble /rust-mumble
-
-EXPOSE 64738/udp
-EXPOSE 64738/tcp
-EXPOSE 8080/tcp
-
-ENV RUST_LOG=info
-
-CMD ["/rust-mumble"] # Password should be passed via args
+EXPOSE 30120
+CMD ["./rust-mumble", "--listen", "0.0.0.0:30120"]
