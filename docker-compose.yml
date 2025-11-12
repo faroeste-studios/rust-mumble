@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   rust-mumble:
     container_name: rust-mumble
