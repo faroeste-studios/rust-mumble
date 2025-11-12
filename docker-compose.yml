@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  rust-mumble:
+    container_name: rust-mumble
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ./rust-mumble --listen 0.0.0.0:30120
+    working_dir: /app/target/release
+    ports:
+      - "30120:30120"
+    restart: unless-stopped
