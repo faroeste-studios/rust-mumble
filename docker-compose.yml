@@ -13,3 +13,8 @@ services:
       - RUST_LOG=info
     command: ["/rust-mumble", "--listen", "0.0.0.0:30120"]
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
